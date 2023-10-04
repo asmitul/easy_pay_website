@@ -7,7 +7,6 @@ import ddddocr
 
 def login(url : str  , username : str , password : str ,quary_key : str | int, query_value : str | int ) -> None:
     
-
     session = requests.session()
     timestamp = int(time.time())
 
