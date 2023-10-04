@@ -117,3 +117,5 @@ venv.bak/
 
 # .DS_Store
 .DS_Store
+src/easy_pay_website/requirements.txt
+README-dev.md
