@@ -126,3 +126,48 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
                 print(f"6 . login response: False")
                 return False
             
+def check_login_status(url : str):
+    # start
+    # check if fx_admin_user_CODE.txt exist or not 
+    
+    if os.path.exists('fx_admin_user_CODE.txt'):
+        with open('fx_admin_user_CODE.txt', 'r') as file:
+            fx_admin_user_CODE = file.read()
+    else:
+        print(f"login status: False")
+        return False
+    
+    if os.path.exists('PHPSESSID.txt'):
+        with open('PHPSESSID.txt', 'r') as file:
+            cookiesPHPSESSID = file.read()
+    else:
+        print(f"login status: False")
+        return False
+    
+    url = url + "/manage/main/index.html"
+    cookies={
+            "JSESSIONID": cookiesPHPSESSID,
+            'QINGZHIFU_PATH': 'qingzhifu',
+            'fx_admin_user_UNAME': 'admin',
+            'menudd': '0',
+            'fx_admin_user_UID': '1',
+            'fx_admin_user_CODE': fx_admin_user_CODE
+        }
+    
+    session = requests.session()
+
+    try:
+        # code that may raise an error
+        response = session.get(url, cookies=cookies)
+    except Exception as e:
+        # code to handle the error
+        print(f"An error occurred: {e.args}")
+    else:
+        # if response.headers lens 12 returm true else return false
+        if len(response.headers) == 12:
+            print(f"login status: True")
+            return True
+        else:
+            print(f"login status: False")
+            return False
+        
