@@ -17,14 +17,14 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
         response = session.get(url+"/manage.php?"+quary_key+"="+query_value)
     except Exception as e:
         # code to handle the error
-        print(f"An error occurred: {e.args}")
+        # print(f"An error occurred: {e.args}")
         return False
     else:
         # logger.info(f"login response: {response.text}")
         cookiesAfter = response.cookies
         c = cookiesAfter.get_dict()
         cookiesPHPSESSID = c["PHPSESSID"]
-        print(f"1 . get PHPSESSID: {cookiesPHPSESSID}")
+        # print(f"1 . get PHPSESSID: {cookiesPHPSESSID}")
 
     cookiesLogin = {
             'QINGZHIFU_PATH': 'qingzhifu',
@@ -38,7 +38,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
         response = session.get(url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin)
     except Exception as e:
         # code to handle the error
-        print(f"An error occurred: {e.args}")
+        # print(f"An error occurred: {e.args}")
         return False
     else:
         # logger.info(f"login response: {response.text}")
@@ -49,20 +49,21 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
 
         if match:
             number = match.group(1)
-            print(f"3 . login number: {number}")
+            # print(f"3 . login number: {number}")
         else:
-            print("Number not found")
+            # print("Number not found")
+            pass
     
     urlVerify = url + "/Manage/Index/verify.html"
     
     
     try:
         # code that may raise an error
-        print(f"4 . capcha url: {urlVerify}")
+        # print(f"4 . capcha url: {urlVerify}")
         response = session.get(urlVerify, cookies=cookiesLogin)
     except Exception as e:
         # code to handle the error
-        print(f"An error occurred: {e.args}")
+        # print(f"An error occurred: {e.args}")
         return False
     else:
         # code to execute if there is no error
@@ -83,11 +84,11 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
         if os.path.exists(f"captcha_{str(timestamp)}.png"):
             os.remove(f"captcha_{str(timestamp)}.png")
         code = ocr.classification(image)
-        print(f"5 . capcha code: {code}")
-        print(f"login code: {code}")
+        # print(f"5 . capcha code: {code}")
+        # print(f"login code: {code}")
         
         if len(code) != 4:
-            print(f"5 . capcha code error: {code}")
+            # print(f"5 . capcha code error: {code}")
             return False
         
         data = {
@@ -101,16 +102,16 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
 
         try:
             # code that may raise an error
-            print(f"6 . login url: {urlLogin} , data: {data}")
+            # print(f"6 . login url: {urlLogin} , data: {data}")
             responseLogin = session.post(urlLogin, data=data, cookies=cookiesLogin)
         except Exception as e:
             # code to handle the error
-            print(f"An error occurred: {e.args}")
+            # print(f"An error occurred: {e.args}")
             return False
         else:
             # check responseLogin.cookies exist or not , if not , return
             if responseLogin.cookies:
-                print(f"6 . login response: True , cookies : {responseLogin.cookies}")
+                # print(f"6 . login response: True , cookies : {responseLogin.cookies}")
                 cookiesR = responseLogin.cookies
                 d = cookiesR.get_dict()
                 fx_admin_user_CODE = d["fx_admin_user_CODE"]
@@ -128,7 +129,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
             
 
             else:
-                print(f"6 . login response: False")
+                # print(f"6 . login response: False")
                 return False
             
 def check_login_status(url : str):
@@ -244,24 +245,30 @@ def get_trading_volume(url : str , userId : str, which_day : str):
 
         if float(h4_values[6].split()[0]) == 0:
             data_object = {
-                h4_values[1]: float(h4_values[0].split()[0]),  
-                h4_values[3]: int(h4_values[2].split()[0]),  
-                h4_values[7]: float(h4_values[6].split()[0])  ,
-                "last_order" : todays_last_order_no,
+                'date' : get_today_date(),
+                'time' : get_now_time(),
+                "user_id": userId,
+                f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
+                f"{which_day}_orderAmounts": float(h4_values[0].split()[0]),  
+                f"{which_day}_orderCounts": int(h4_values[2].split()[0]),  
+                f"{which_day}_lastOrder" : todays_last_order_no,
                 "rate" : 0,
             }
         else:
             data_object = {
-                h4_values[1]: float(h4_values[0].split()[0]),  
-                h4_values[3]: int(h4_values[2].split()[0]),  
-                h4_values[7]: float(h4_values[6].split()[0])  ,
-                "last_order" : todays_last_order_no,
+                'date' : get_today_date(),
+                'time' : get_now_time(),
+                "user_id": userId,
+                f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
+                f"{which_day}_orderAmounts": float(h4_values[0].split()[0]),  
+                f"{which_day}_orderCounts": int(h4_values[2].split()[0]),  
+                f"{which_day}_lastOrder" : todays_last_order_no,
                 "rate" : round(( 1 - float(h4_values[0].split()[0]) / float(h4_values[6].split()[0]) ) * 100 , 2 ),
             }
         # print(data_object)
         # return data_object
 
-        if data_object['last_order'] == None:
+        if data_object[f"{which_day}_lastOrder"] == None:
             # data_object['balance'] = 0
             try:
                 # code that may raise an error
@@ -288,11 +295,11 @@ def get_trading_volume(url : str , userId : str, which_day : str):
                     else:
                             current_balance = float(current_balance)
                     
-                data_object['balance'] = current_balance
+                data_object[f"{which_day}_lastBalance"] = current_balance
         else:
             try:
                 # code that may raise an error
-                response = session.get(url+"/manage/pay/moneylog.html?ordersn="+data_object['last_order'], cookies=cookies)
+                response = session.get(url+"/manage/pay/moneylog.html?ordersn="+data_object[f"{which_day}_lastOrder"], cookies=cookies)
             except Exception as e:
                 # code to handle the error
                 print(f"An error occurred: {e.args}")
@@ -312,11 +319,11 @@ def get_trading_volume(url : str , userId : str, which_day : str):
                         current_balance = float(balance_soup_td_tags[13].text)
                     else:
                         current_balance = None
-                data_object['balance'] = current_balance
+                data_object[f"{which_day}_lastBalance"] = current_balance
         
-        print(data_object)
+        # print(data_object)
     try:
-        print(date_string)
+        # print(date_string)
         # code that may raise an error
         response = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+date_string+" 00:00:00&end="+date_string+" 23:59:59&style=2", cookies=cookies)
     except Exception as e:
@@ -326,10 +333,10 @@ def get_trading_volume(url : str , userId : str, which_day : str):
         soup = BeautifulSoup(response.text, 'html.parser')
         withdraw_soup = soup.find('tbody')
         withdraw_soup_tr_tags = withdraw_soup.find_all('tr')
-        print(f"withdraw_soup_tr_tags: {withdraw_soup_tr_tags}")
-        print(f"len of withdraw_soup_tr_tags: {len(withdraw_soup_tr_tags)}")
+        # print(f"withdraw_soup_tr_tags: {withdraw_soup_tr_tags}")
+        # print(f"len of withdraw_soup_tr_tags: {len(withdraw_soup_tr_tags)}")
         if len(withdraw_soup_tr_tags[0].text) == 6:
-            data_object['withdraw'] = None
+            data_object[f"{which_day}_withdraws"] = []
         else:
             # data_object['withdraw'] = float(withdraw_soup_tr_tags[0].text)
             # data_object['withdraw'] = 1
@@ -343,19 +350,21 @@ def get_trading_volume(url : str , userId : str, which_day : str):
                     'amount': float(withdraw_soup_td_tags[4].text),
                 })
 
-            data_object['withdraw'] = withdraw_data
+            data_object[f"{which_day}_withdraws"] = withdraw_data
+            
         
+
         print(data_object)
         return data_object
 
 def get_today_date():
     now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    today_date = now.date()
+    today_date = now.date().strftime("%Y-%m-%d")
     return today_date
 
 def get_yesterday_date():
     now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    yesterday_date = (now - datetime.timedelta(days=1)).date()
+    yesterday_date = (now - datetime.timedelta(days=1)).date().strftime("%Y-%m-%d")
     return yesterday_date
 
 def get_now_time():
@@ -386,4 +395,3 @@ def get_yesterday_00_00_millisecond():
         yesterday_00_00_millisecond = yesterday_utc1600
     # print(f"yesterday_00_00_millisecond: {yesterday_00_00_millisecond}")
     return yesterday_00_00_millisecond
-
