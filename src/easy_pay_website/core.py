@@ -179,15 +179,13 @@ def check_login_status(url : str):
             return False
 
 
-def get_trading_volume(url : str , userId : str, which_day : str):
+def get_trading_volume(url : str , userId : str, which_day : str, start_date_0000 : str, end_date_2359 : str):
     
     if which_day == "today":
         time_value = get_today_00_00_millisecond()
-        date_string = str(get_today_date())
     
     elif which_day == "yesterday":
         time_value = get_yesterday_00_00_millisecond()
-        date_string = str(get_yesterday_date())
     else:
         return False
     
@@ -245,8 +243,8 @@ def get_trading_volume(url : str , userId : str, which_day : str):
 
         if float(h4_values[6].split()[0]) == 0:
             data_object = {
-                'date' : get_today_date(),
-                'time' : get_now_time(),
+                'date' : get_date(0),
+                'time' : get_time(),
                 "user_id": userId,
                 "which_day":which_day,
                 f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
@@ -257,8 +255,8 @@ def get_trading_volume(url : str , userId : str, which_day : str):
             }
         else:
             data_object = {
-                'date' : get_today_date(),
-                'time' : get_now_time(),
+                'date' : get_date(0),
+                'time' : get_time(),
                 "user_id": userId,
                 "which_day":which_day,
                 f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
@@ -327,7 +325,7 @@ def get_trading_volume(url : str , userId : str, which_day : str):
     try:
         # print(date_string)
         # code that may raise an error
-        response = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+date_string+" 00:00:00&end="+date_string+" 23:59:59&style=2", cookies=cookies)
+        response = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+start_date_0000+" 00:00:00&end="+end_date_2359+" 23:59:59&style=2", cookies=cookies)
     except Exception as e:
         # code to handle the error
         print(f"An error occurred: {e.args}")
@@ -359,20 +357,14 @@ def get_trading_volume(url : str , userId : str, which_day : str):
         print(data_object)
         return data_object
 
-def get_today_date():
+def get_date(days: int = 0):
     now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    today_date = now.date().strftime("%Y-%m-%d")
-    return today_date
+    date = (now - datetime.timedelta(days)).date().strftime("%Y-%m-%d")
+    return date
 
-def get_yesterday_date():
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    yesterday_date = (now - datetime.timedelta(days=1)).date().strftime("%Y-%m-%d")
-    return yesterday_date
-
-def get_now_time():
+def get_time():
     now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
     current_time = now.strftime("%H:%M")
-    print(f"current_time: {current_time}")
     return current_time
 
 def get_today_00_00_millisecond():
@@ -395,5 +387,4 @@ def get_yesterday_00_00_millisecond():
         yesterday_00_00_millisecond = yesterday_utc1600 - 24 * 60 * 60 
     else:
         yesterday_00_00_millisecond = yesterday_utc1600
-    # print(f"yesterday_00_00_millisecond: {yesterday_00_00_millisecond}")
     return yesterday_00_00_millisecond
