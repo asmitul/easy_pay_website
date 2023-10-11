@@ -334,7 +334,7 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
         withdraw_soup = soup.find('tbody')
         withdraw_soup_tr_tags = withdraw_soup.find_all('tr')
         # print(f"withdraw_soup_tr_tags: {withdraw_soup_tr_tags}")
-        # print(f"len of withdraw_soup_tr_tags: {len(withdraw_soup_tr_tags)}")
+        # print(f"len of withdraw_soup_tr_tags: {len(withdraw_soup_tr_tags[0].text)}")
         if len(withdraw_soup_tr_tags[0].text) == 6:
             data_object[f"{which_day}_withdraws"] = []
         else:
@@ -352,10 +352,27 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
 
             data_object[f"{which_day}_withdraws"] = withdraw_data
             
+    
+    try:
+        response_2 = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+start_date_0000+" 00:00:00&end="+end_date_2359+" 23:59:59&style=", cookies=cookies)
+    except Exception as e:
+        # code to handle the error
+        print(f"An error occurred: {e.args}")
+    else:
+        soup = BeautifulSoup(response_2.text, 'html.parser')
+        last_trasnfer = soup.find('tbody')
+        last_trasnfer_td_tags =last_trasnfer.find_all('td')
         
+        # print(f"last_trasnfer_td_tags: {last_trasnfer_td_tags[0].text}")
+        # print(f'len : {len(last_trasnfer_td_tags[0].text)}')
+        if len(last_trasnfer_td_tags[0].text) == 4:
+            data_object[f"last_trasnfer_remain"] = []
+        else:
+            data_object[f"last_trasnfer_remain"] = float(last_trasnfer_td_tags[5].text)
+    
+    print(f'data_object: {data_object}')
+    return data_object
 
-        print(data_object)
-        return data_object
 
 def get_date(days: int = 0):
     now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
@@ -388,3 +405,5 @@ def get_yesterday_00_00_millisecond():
     else:
         yesterday_00_00_millisecond = yesterday_utc1600
     return yesterday_00_00_millisecond
+
+
