@@ -119,3 +119,4 @@ venv.bak/
 .DS_Store
 src/easy_pay_website/requirements.txt
 README-dev.md
+example_auth.py
