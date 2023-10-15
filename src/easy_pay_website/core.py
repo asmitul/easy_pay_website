@@ -183,9 +183,11 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
     
     if which_day == "today":
         time_value = get_today_00_00_millisecond()
+        date_velue = get_date(0)
     
     elif which_day == "yesterday":
         time_value = get_yesterday_00_00_millisecond()
+        date_velue = get_date(1)
     else:
         return False
     
@@ -243,7 +245,7 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
 
         if float(h4_values[6].split()[0]) == 0:
             data_object = {
-                'date' : get_date(0),
+                'date' : date_velue,
                 'time' : get_time(),
                 "user_id": userId,
                 "which_day":which_day,
@@ -255,7 +257,7 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
             }
         else:
             data_object = {
-                'date' : get_date(0),
+                'date' : date_velue,
                 'time' : get_time(),
                 "user_id": userId,
                 "which_day":which_day,
@@ -370,7 +372,7 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
         else:
             data_object[f"last_trasnfer_remain"] = float(last_trasnfer_td_tags[5].text)
     
-    print(f'data_object: {data_object}')
+    # print(f'data_object: {data_object}')
     return data_object
 
 
