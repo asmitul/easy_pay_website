@@ -27,6 +27,7 @@ dependencies = [
   "requests >= 2.31.0",
   "beautifulsoup4 >= 4.12.2",
   "pytz >= 2023.3",
+  "odin-functions == 0.0.3",
 ]
 description = "easy pay website"
 dynamic = ["version"]

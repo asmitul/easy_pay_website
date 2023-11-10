@@ -4,151 +4,232 @@ import os
 import time
 from bs4 import BeautifulSoup
 import ddddocr
-import datetime
-import pytz
+from odin_functions import check
+
 
 def login(url : str  , username : str , password : str ,quary_key : str | int, query_value : str | int ) -> None:
+    """
+    Login to the specified URL using the provided username and password, along with additional query parameters.
     
+    Args:
+        url (str): The URL to log in to.
+        username (str): The username to use for authentication.
+        password (str): The password to use for authentication.
+        quary_key (str | int): The key for the query parameter.
+        query_value (str | int): The value for the query parameter.
+    
+    Returns:
+        dict: A dictionary containing the login result. The dictionary has the following keys:
+            - "result" (bool): The result of the login attempt.
+            - "message" (str): A message indicating the result of the login attempt.
+            - "data" (dict): Additional data related to the login attempt.
+        
+    """
+        
     session = requests.session()
     timestamp = int(time.time())
 
     try:
-        # code that may raise an error
         response = session.get(url+"/manage.php?"+quary_key+"="+query_value)
+        if check.type_name(response) == 'NoneType':
+            return {
+                        "result": False,
+                        "message": "failed",
+                        "data" : []
+                    }
     except Exception as e:
-        # code to handle the error
-        # print(f"An error occurred: {e.args}")
-        return False
+        return {
+                    "result": False,
+                    "message": "failed",
+                    "data" : []
+            }
     else:
-        # logger.info(f"login response: {response.text}")
         cookiesAfter = response.cookies
         c = cookiesAfter.get_dict()
         cookiesPHPSESSID = c["PHPSESSID"]
-        # print(f"1 . get PHPSESSID: {cookiesPHPSESSID}")
+        if check.type_name(cookiesPHPSESSID) == 'NoneType':
+            return {
+                        "result": False,
+                        "message": "failed",
+                        "data" : []
+                    }
 
-    cookiesLogin = {
-            'QINGZHIFU_PATH': 'qingzhifu',
-            'PHPSESSID': cookiesPHPSESSID
-        }
+        cookiesLogin = {
+                'QINGZHIFU_PATH': 'qingzhifu',
+                'PHPSESSID': cookiesPHPSESSID
+            }
 
-
-    try:
-        # code that may raise an error
-        # logger.info(f"2 . get number , url :{URL}/manage.php?{KEY}={VALUE}")
-        response = session.get(url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin)
-    except Exception as e:
-        # code to handle the error
-        # print(f"An error occurred: {e.args}")
-        return False
-    else:
-        # logger.info(f"login response: {response.text}")
-        soup = BeautifulSoup(response.text, 'html.parser')
-        form = soup.find('form', {'method': 'post'})
-        action_value = form['action']
-        match = re.search(r'/(\d+)\.html$', action_value)
-
-        if match:
-            number = match.group(1)
-            # print(f"3 . login number: {number}")
-        else:
-            # print("Number not found")
-            pass
-    
-    urlVerify = url + "/Manage/Index/verify.html"
-    
-    
-    try:
-        # code that may raise an error
-        # print(f"4 . capcha url: {urlVerify}")
-        response = session.get(urlVerify, cookies=cookiesLogin)
-    except Exception as e:
-        # code to handle the error
-        # print(f"An error occurred: {e.args}")
-        return False
-    else:
-        # code to execute if there is no error
-        with open(f"captcha_{str(timestamp)}.png", "wb") as file:
-            # Write the image data to the file
-            file.write(response.content)
-
-        # cookiesAfter = response.cookies
-        # c = cookiesAfter.get_dict()
-        # cookiesPHPSESSID = c["PHPSESSID"]
-
-        # # read captcha
-        ocr = ddddocr.DdddOcr()
-        with open(f"captcha_{str(timestamp)}.png", 'rb') as f:
-            image = f.read()
-        
-        # delete the f"captcha_{str(timestamp)}.png"
-        if os.path.exists(f"captcha_{str(timestamp)}.png"):
-            os.remove(f"captcha_{str(timestamp)}.png")
-        code = ocr.classification(image)
-        # print(f"5 . capcha code: {code}")
-        # print(f"login code: {code}")
-        
-        if len(code) != 4:
-            # print(f"5 . capcha code error: {code}")
-            return False
-        
-        data = {
-            "username": username,
-            "password": password,
-            "yzm": code
-        }
-
-        urlLogin = url + "/Manage/Index/login/" + number + ".html"
-        
 
         try:
-            # code that may raise an error
-            # print(f"6 . login url: {urlLogin} , data: {data}")
-            responseLogin = session.post(urlLogin, data=data, cookies=cookiesLogin)
-        except Exception as e:
-            # code to handle the error
-            # print(f"An error occurred: {e.args}")
-            return False
-        else:
-            # check responseLogin.cookies exist or not , if not , return
-            if responseLogin.cookies:
-                # print(f"6 . login response: True , cookies : {responseLogin.cookies}")
-                cookiesR = responseLogin.cookies
-                d = cookiesR.get_dict()
-                fx_admin_user_CODE = d["fx_admin_user_CODE"]
-                with open('fx_admin_user_CODE.txt', 'w') as file:
-                                # Write some text to the file
-                                file.write(fx_admin_user_CODE)
-                with open('PHPSESSID.txt', 'w') as file:
-                                # Write some text to the file
-                                file.write(cookiesPHPSESSID)
-                
+            response = session.get(url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin)
+            if check.type_name(response) == 'NoneType':
                 return {
-                    "fx_admin_user_CODE": fx_admin_user_CODE,
-                    "PHPSESSID": cookiesPHPSESSID
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
+        except Exception as e:
+            return {
+                        "result": False,
+                        "message": "failed",
+                        "data" : []
                 }
-            
+        else:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            if check.type_name(soup) == 'NoneType':
+                return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
+            form = soup.find('form', {'method': 'post'})
+            if check.type_name(form) == 'NoneType':
+                return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
+            action_value = form['action']
+            if check.type_name(action_value) == 'NoneType':
+                return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
+            match = re.search(r'/(\d+)\.html$', action_value)
+            if check.type_name(match) == 'NoneType':
+                return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
 
+            if match:
+                number = match.group(1)
             else:
-                # print(f"6 . login response: False")
-                return False
+                pass
+        
+            urlVerify = url + "/Manage/Index/verify.html"
+            
+            
+            try:
+                response = session.get(urlVerify, cookies=cookiesLogin)
+                if check.type_name(response) == 'NoneType':
+                    return {
+                                "result": False,
+                                "message": "failed",
+                                "data" : []
+                            }
+            except Exception as e:
+                return {
+                                "result": False,
+                                "message": "failed",
+                                "data" : []
+                            }
+            else:
+                with open(f"captcha_{str(timestamp)}.png", "wb") as file:
+                    file.write(response.content)
+
+                ocr = ddddocr.DdddOcr()
+                with open(f"captcha_{str(timestamp)}.png", 'rb') as f:
+                    image = f.read()
+                
+                if os.path.exists(f"captcha_{str(timestamp)}.png"):
+                    os.remove(f"captcha_{str(timestamp)}.png")
+                
+                code = ocr.classification(image)
+                
+                if len(code) != 4:
+                    return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                    }
+                
+                data = {
+                    "username": username,
+                    "password": password,
+                    "yzm": code
+                }
+
+                urlLogin = url + "/Manage/Index/login/" + number + ".html"
+                
+
+                try:
+                    responseLogin = session.post(urlLogin, data=data, cookies=cookiesLogin)
+                    if check.type_name(responseLogin) == 'NoneType':
+                        return {
+                                    "result": False,
+                                    "message": "failed",
+                                    "data" : []
+                                }
+
+                except Exception as e:
+                    return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                    }
+                else:
+                    if responseLogin.cookies:
+                        cookiesR = responseLogin.cookies
+                        d = cookiesR.get_dict()
+                        fx_admin_user_CODE = d["fx_admin_user_CODE"]
+                        with open('fx_admin_user_CODE.txt', 'w') as file:
+                                        file.write(fx_admin_user_CODE)
+                        with open('PHPSESSID.txt', 'w') as file:
+                                        file.write(cookiesPHPSESSID)
+                        
+                        return {
+                            "result": True,
+                            "message": "success",
+                            "data" : [{
+                                "fx_admin_user_CODE": fx_admin_user_CODE,
+                                "PHPSESSID": cookiesPHPSESSID
+                            }]
+                        }
+                    
+                    else:
+                        return {
+                            "result": False,
+                            "message": "failed",
+                            "data" : []
+                        }
             
 def check_login_status(url : str):
-    # start
-    # check if fx_admin_user_CODE.txt exist or not 
+    """
+    Check the login status by sending a GET request to the specified URL.
     
+    Parameters:
+        url (str): The URL to send the GET request to.
+        
+    Returns:
+        dict: A dictionary containing the result of the login status check. The dictionary has the following keys:
+            - result (bool): True if the login status check is successful, False otherwise.
+            - message (str): A message indicating the result of the login status check.
+            - data (dict): Additional data related to the login status check. The dictionary has the following keys:
+                - fx_admin_user_CODE (str): The code of the admin user.
+                - PHPSESSID (str): The PHP session ID.
+    """
     if os.path.exists('fx_admin_user_CODE.txt'):
         with open('fx_admin_user_CODE.txt', 'r') as file:
             fx_admin_user_CODE = file.read()
     else:
-        print(f"login status: False")
-        return False
+        return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+            }
     
     if os.path.exists('PHPSESSID.txt'):
         with open('PHPSESSID.txt', 'r') as file:
             cookiesPHPSESSID = file.read()
     else:
-        print(f"login status: False")
-        return False
+        return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+            }
     
     url = url + "/manage/main/index.html"
     cookies={
@@ -163,42 +244,88 @@ def check_login_status(url : str):
     session = requests.session()
 
     try:
-        # code that may raise an error
         response = session.get(url, cookies=cookies)
+        if check.type_name(response) == 'NoneType':
+            return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+            }
     except Exception as e:
-        # code to handle the error
-        print(f"An error occurred: {e.args}")
-        return False
+        return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+            }
     else:
-        # if response.headers lens 12 returm true else return false
         if len(response.headers) == 12:
-            print(f"login status: True")
-            return True
+            return {
+                "result": True,
+                "message": "success",
+                "data" : [{
+                    "fx_admin_user_CODE": fx_admin_user_CODE,
+                    "PHPSESSID": cookiesPHPSESSID
+                }]
+            }
         else:
-            print(f"login status: False")
-            return False
+            return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+            }
 
 
-def get_trading_volume(url : str , userId : str, which_day : str, start_date_0000 : str, end_date_2359 : str):
+def main(url : str , path : str ,query : dict):
+    """
+    Executes a main function that performs a series of operations.
     
-    if which_day == "today":
-        time_value = get_today_00_00_millisecond()
-        date_velue = get_date(0)
+    Args:
+        url (str): The URL to send the request to.
+        path (str): The path to append to the URL.
+        query (dict): The query parameters to include in the request.
+        
+    Returns:
+        dict: A dictionary with the following keys:
+            - result (bool): Indicates whether the operation was successful.
+            - message (str): A message describing the result of the operation.
+            - data (list): A list of data returned by the operation.
+    """
+    result = check_login_status(url)
+    if check.type_name(result) == 'NoneType':
+        return {
+                "result": False,
+                "message": "check_login_status() result is NoneType",
+                "data" : []
+            }
     
-    elif which_day == "yesterday":
-        time_value = get_yesterday_00_00_millisecond()
-        date_velue = get_date(1)
-    else:
-        return False
-    
+    if result["result"] == False:
+        return {
+                "result": False,
+                "message": "login failed",
+                "data" : []
+            }
+    elif result["result"] == True:
+        if os.path.exists('fx_admin_user_CODE.txt'):
+            with open('fx_admin_user_CODE.txt', 'r') as file:
+                fx_admin_user_CODE = file.read()
+        else:
+            return {
+                    "result": False,
+                    "message": "failed",
+                    "data" : []
+                }
+        
+        if os.path.exists('PHPSESSID.txt'):
+            with open('PHPSESSID.txt', 'r') as file:
+                cookiesPHPSESSID = file.read()
+        else:
+            return {
+                    "result": False,
+                    "message": "failed",
+                    "data" : []
+                }
 
-    session = requests.session()
-    with open('fx_admin_user_CODE.txt', 'r') as file:
-        fx_admin_user_CODE = file.read()
-    with open('PHPSESSID.txt', 'r') as file:
-        cookiesPHPSESSID = file.read()
-
-    cookies={
+        cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
             'fx_admin_user_UNAME': 'admin',
@@ -206,206 +333,52 @@ def get_trading_volume(url : str , userId : str, which_day : str, start_date_000
             'fx_admin_user_UID': '1',
             'fx_admin_user_CODE': fx_admin_user_CODE
         }
-    try:
-        # code that may raise an error
-        response = session.get(url+"/manage/dingdan/dingdancheck.html?userid=" + userId + "&pzid=&jkstyle=&time=" + str(time_value)+"&money=&mypagenum", cookies=cookies)
-    except Exception as e:
-        # code to handle the error
-        print(f"An error occurred: {e.args}")
-        return False
-    else:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        form = soup.find('div', {'class': 'row tagtopdiv'})
-        # fild all h4 tag
-        h4_tags = form.find_all('h4')
-        # print h4_tags value one by one , and append to the new list
-        h4_values = []
-        for h4_tag in h4_tags:
-            h4_values.append(h4_tag.text)
-        for i in range(len(h4_values)):
-            h4_values[i] = h4_values[i].strip()
-        h4_values[0] = h4_values[0][1:-2]
-        h4_values[2] = h4_values[2][:-2]
-        h4_values[6] = h4_values[6][1:-2]
 
-        # find last order
-        last_soup = soup.find('tbody')
-        # print(f"last order: {last_soup}")
-        # find all td
-        last_soup_td_tags = last_soup.find_all('td')
-        # print(f"last order td: {last_soup_td_tags}")
-        # find frist tr fourest td
+        session = requests.session()
+
         try:
-            print(last_soup_td_tags[3].text)
+            response = session.get(url+path,params=query, cookies=cookies)
+            if check.type_name(response) == 'NoneType':
+                return {
+                    "result": False,
+                    "message": "failed",
+                    "data" : []
+                }
         except Exception as e:
-            todays_last_order_no = None
+            return {
+                    "result": False,
+                    "message": "failed",
+                    "data" : []
+                }
         else:
-            todays_last_order_no = last_soup_td_tags[3].text
+            soup = BeautifulSoup(response.text, 'html.parser')
+            form = soup.find('form', {'method': 'post'})
+            table = form.find('table', {'class': 'table table-hover'})
+            tbody = table.find('tbody')
 
+            trs = tbody.find_all('tr')
+            data = []
 
-        if float(h4_values[6].split()[0]) == 0:
-            data_object = {
-                'date' : date_velue,
-                'time' : get_time(),
-                "user_id": userId,
-                "which_day":which_day,
-                f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
-                f"{which_day}_orderAmounts": float(h4_values[0].split()[0]),  
-                f"{which_day}_orderCounts": int(h4_values[2].split()[0]),  
-                f"{which_day}_lastOrder" : todays_last_order_no,
-                "rate" : 0,
+            for tr in trs:
+                tds = tr.find_all('td')
+                row = []
+                for td in tds:
+                    row.append(td.text)
+                # if row equl to []
+                if len(row) == 0:
+                    continue
+                data.append(row)
+
+            return {
+                "result": True,
+                "message": "success",
+                "data" : data
             }
-        else:
-            data_object = {
-                'date' : date_velue,
-                'time' : get_time(),
-                "user_id": userId,
-                "which_day":which_day,
-                f"{which_day}_orderAmountsFull": float(h4_values[6].split()[0])  ,
-                f"{which_day}_orderAmounts": float(h4_values[0].split()[0]),  
-                f"{which_day}_orderCounts": int(h4_values[2].split()[0]),  
-                f"{which_day}_lastOrder" : todays_last_order_no,
-                "rate" : round(( 1 - float(h4_values[0].split()[0]) / float(h4_values[6].split()[0]) ) * 100 , 2 ),
-            }
-        # print(data_object)
-        # return data_object
-
-        if data_object[f"{which_day}_lastOrder"] == None:
-            # data_object['balance'] = 0
-            try:
-                # code that may raise an error
-                response = session.get(url+"/manage/user/index.html?userid="+userId, cookies=cookies)
-            except Exception as e:
-                # code to handle the error
-                print(f"An error occurred: {e.args}")
-            else:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                balance_soup = soup.find('tbody')
-                balance_soup_td_tags = balance_soup.find_all('td')
-                try:
-                    print(balance_soup_td_tags[6].text)
-                except Exception as e:
-                    current_balance = None
-                else:
-                    current_balance = balance_soup_td_tags[6].text
-                
-                    # handle string delete after 【
-                    
-                    index = current_balance.find("【")
-                    if index != -1:
-                            current_balance = float(current_balance[:index])
-                    else:
-                            current_balance = float(current_balance)
-                    
-                data_object[f"{which_day}_lastBalance"] = current_balance
-        else:
-            try:
-                # code that may raise an error
-                response = session.get(url+"/manage/pay/moneylog.html?ordersn="+data_object[f"{which_day}_lastOrder"], cookies=cookies)
-            except Exception as e:
-                # code to handle the error
-                print(f"An error occurred: {e.args}")
-            else:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                balance_soup = soup.find('tbody')
-                balance_soup_td_tags = balance_soup.find_all('td')
-                try:
-                    print(balance_soup_td_tags[5].text)
-                except Exception as e:
-                    current_balance = None
-                else:
-                    # current_balance = float(balance_soup_td_tags[5].text)
-                    if userId == balance_soup_td_tags[2].text:
-                        current_balance = float(balance_soup_td_tags[5].text)
-                    elif userId == balance_soup_td_tags[10].text:
-                        current_balance = float(balance_soup_td_tags[13].text)
-                    else:
-                        current_balance = None
-                data_object[f"{which_day}_lastBalance"] = current_balance
-        
-        # print(data_object)
-    try:
-        # print(date_string)
-        # code that may raise an error
-        response = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+start_date_0000+" 00:00:00&end="+end_date_2359+" 23:59:59&style=2", cookies=cookies)
-    except Exception as e:
-        # code to handle the error
-        print(f"An error occurred: {e.args}")
-    else:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        withdraw_soup = soup.find('tbody')
-        withdraw_soup_tr_tags = withdraw_soup.find_all('tr')
-        # print(f"withdraw_soup_tr_tags: {withdraw_soup_tr_tags}")
-        # print(f"len of withdraw_soup_tr_tags: {len(withdraw_soup_tr_tags[0].text)}")
-        if len(withdraw_soup_tr_tags[0].text) == 6:
-            data_object[f"{which_day}_withdraws"] = []
-        else:
-            # data_object['withdraw'] = float(withdraw_soup_tr_tags[0].text)
-            # data_object['withdraw'] = 1
-            withdraw_data = []
-            for i in range(len(withdraw_soup_tr_tags)):
-                # find all td
-                withdraw_soup_td_tags = withdraw_soup_tr_tags[i].find_all('td')
-                # use dictionary to store data
-                withdraw_data.append({
-                    'date': withdraw_soup_td_tags[7].text,
-                    'amount': float(withdraw_soup_td_tags[4].text),
-                })
-
-            data_object[f"{which_day}_withdraws"] = withdraw_data
             
-    
-    try:
-        response_2 = session.get(url+"/manage/pay/moneylog.html?userid="+userId+"&start="+start_date_0000+" 00:00:00&end="+end_date_2359+" 23:59:59&style=", cookies=cookies)
-    except Exception as e:
-        # code to handle the error
-        print(f"An error occurred: {e.args}")
     else:
-        soup = BeautifulSoup(response_2.text, 'html.parser')
-        last_trasnfer = soup.find('tbody')
-        last_trasnfer_td_tags =last_trasnfer.find_all('td')
-        
-        # print(f"last_trasnfer_td_tags: {last_trasnfer_td_tags[0].text}")
-        # print(f'len : {len(last_trasnfer_td_tags[0].text)}')
-        if len(last_trasnfer_td_tags[0].text) == 4:
-            data_object[f"last_trasnfer_remain"] = []
-        else:
-            data_object[f"last_trasnfer_remain"] = float(last_trasnfer_td_tags[5].text)
-    
-    # print(f'data_object: {data_object}')
-    return data_object
-
-
-def get_date(days: int = 0):
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    date = (now - datetime.timedelta(days)).date().strftime("%Y-%m-%d")
-    return date
-
-def get_time():
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    current_time = now.strftime("%H:%M")
-    return current_time
-
-def get_today_00_00_millisecond():
-    timestamp = int(time.time()) 
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    latest_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_utc1600 = int(latest_time.timestamp() )
-    if timestamp < today_utc1600:
-        today_00_00_millisecond = today_utc1600 - 24 * 60 * 60 
-    else:
-        today_00_00_millisecond = today_utc1600
-    return today_00_00_millisecond
-
-def get_yesterday_00_00_millisecond():
-    timestamp = int(time.time()) - 24 * 60 * 60
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    latest_time = (now - datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    yesterday_utc1600 = int(latest_time.timestamp() )
-    if timestamp < yesterday_utc1600:
-        yesterday_00_00_millisecond = yesterday_utc1600 - 24 * 60 * 60 
-    else:
-        yesterday_00_00_millisecond = yesterday_utc1600
-    return yesterday_00_00_millisecond
-
+        return {
+                "result": False,
+                "message": "failed",
+                "data" : []
+        }
 
