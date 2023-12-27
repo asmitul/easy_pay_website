@@ -235,7 +235,7 @@ def check_login_status(url : str):
     cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'admin',
+            'fx_admin_user_UNAME': 'beidou',
             'menudd': '0',
             'fx_admin_user_UID': '1',
             'fx_admin_user_CODE': fx_admin_user_CODE
@@ -328,7 +328,7 @@ def main(url : str , path : str ,query : dict):
         cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'admin',
+            'fx_admin_user_UNAME': 'beidou',
             'menudd': '0',
             'fx_admin_user_UID': '1',
             'fx_admin_user_CODE': fx_admin_user_CODE
