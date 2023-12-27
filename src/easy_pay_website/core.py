@@ -215,6 +215,7 @@ def check_login_status(url : str):
         with open('fx_admin_user_CODE.txt', 'r') as file:
             fx_admin_user_CODE = file.read()
     else:
+        print("fx_admin_user_CODE.txt not found")
         return {
                 "result": False,
                 "message": "failed",
@@ -225,6 +226,7 @@ def check_login_status(url : str):
         with open('PHPSESSID.txt', 'r') as file:
             cookiesPHPSESSID = file.read()
     else:
+        print("PHPSESSID.txt not found")
         return {
                 "result": False,
                 "message": "failed",
@@ -235,9 +237,9 @@ def check_login_status(url : str):
     cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'admin',
+            'fx_admin_user_UNAME': 'beidou',
             'menudd': '0',
-            'fx_admin_user_UID': '1',
+            'fx_admin_user_UID': '17',
             'fx_admin_user_CODE': fx_admin_user_CODE
         }
     
@@ -246,18 +248,21 @@ def check_login_status(url : str):
     try:
         response = session.get(url, cookies=cookies)
         if check.type_name(response) == 'NoneType':
+            print(f"check 251")
             return {
                 "result": False,
                 "message": "failed",
                 "data" : []
             }
     except Exception as e:
+        print(f"check 258")
         return {
                 "result": False,
                 "message": "failed",
                 "data" : []
             }
     else:
+        print(response.text)
         if len(response.headers) == 12:
             return {
                 "result": True,
@@ -268,6 +273,7 @@ def check_login_status(url : str):
                 }]
             }
         else:
+            print(f"check 275")
             return {
                 "result": False,
                 "message": "failed",
@@ -328,9 +334,9 @@ def main(url : str , path : str ,query : dict):
         cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'admin',
+            'fx_admin_user_UNAME': 'beidou',
             'menudd': '0',
-            'fx_admin_user_UID': '1',
+            'fx_admin_user_UID': '17',
             'fx_admin_user_CODE': fx_admin_user_CODE
         }
 
@@ -381,4 +387,6 @@ def main(url : str , path : str ,query : dict):
                 "message": "failed",
                 "data" : []
         }
+
+
 
