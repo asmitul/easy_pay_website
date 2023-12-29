@@ -262,7 +262,7 @@ def check_login_status(url : str):
                 "data" : []
             }
     else:
-        print(response.text)
+        # print(response.text)
         if len(response.headers) == 12:
             return {
                 "result": True,
