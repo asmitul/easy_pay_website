@@ -30,7 +30,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
     timestamp = int(time.time())
 
     try:
-        response = session.get(url+"/manage.php?"+quary_key+"="+query_value)
+        response = session.get(url=url+"/manage.php?"+quary_key+"="+query_value, timeout=5)
         if check.type_name(response) == 'NoneType':
             return {
                         "result": False,
@@ -61,7 +61,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
 
 
         try:
-            response = session.get(url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin)
+            response = session.get(url=url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin, timeout=5)
             if check.type_name(response) == 'NoneType':
                 return {
                             "result": False,
@@ -113,7 +113,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
             
             
             try:
-                response = session.get(urlVerify, cookies=cookiesLogin)
+                response = session.get(url=urlVerify, cookies=cookiesLogin, timeout=5)
                 if check.type_name(response) == 'NoneType':
                     return {
                                 "result": False,
@@ -156,7 +156,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
                 
 
                 try:
-                    responseLogin = session.post(urlLogin, data=data, cookies=cookiesLogin)
+                    responseLogin = session.post(url=urlLogin, data=data, cookies=cookiesLogin, timeout=5)
                     if check.type_name(responseLogin) == 'NoneType':
                         return {
                                     "result": False,
@@ -246,7 +246,7 @@ def check_login_status(url : str):
     session = requests.session()
 
     try:
-        response = session.get(url, cookies=cookies)
+        response = session.get(url=url, cookies=cookies, timeout=5)
         if check.type_name(response) == 'NoneType':
             print(f"check 251")
             return {
@@ -343,7 +343,7 @@ def main(url : str , path : str ,query : dict):
         session = requests.session()
 
         try:
-            response = session.get(url+path,params=query, cookies=cookies)
+            response = session.get(url=url+path,params=query, cookies=cookies, timeout=5)
             if check.type_name(response) == 'NoneType':
                 return {
                     "result": False,
