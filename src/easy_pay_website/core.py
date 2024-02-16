@@ -5,9 +5,10 @@ import time
 from bs4 import BeautifulSoup
 import ddddocr
 from odin_functions import check
+from typing import Union
 
 
-def login(url : str  , username : str , password : str ,quary_key : str | int, query_value : str | int ) -> None:
+def login(url: str, username: str, password: str, quary_key: Union[str, int], query_value: Union[str, int]) -> None:
     """
     Login to the specified URL using the provided username and password, along with additional query parameters.
     
@@ -196,7 +197,7 @@ def login(url : str  , username : str , password : str ,quary_key : str | int, q
                             "data" : []
                         }
             
-def check_login_status(url : str):
+def check_login_status(url : str, admin_name : str, admin_id : str):
     """
     Check the login status by sending a GET request to the specified URL.
     
@@ -218,7 +219,7 @@ def check_login_status(url : str):
         print("fx_admin_user_CODE.txt not found")
         return {
                 "result": False,
-                "message": "failed",
+                "message": "fx_admin_user_CODE.txt not found",
                 "data" : []
             }
     
@@ -229,7 +230,7 @@ def check_login_status(url : str):
         print("PHPSESSID.txt not found")
         return {
                 "result": False,
-                "message": "failed",
+                "message": "PHPSESSID.txt not found",
                 "data" : []
             }
     
@@ -237,9 +238,9 @@ def check_login_status(url : str):
     cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'beidou',
+            'fx_admin_user_UNAME': admin_name,
             'menudd': '0',
-            'fx_admin_user_UID': '17',
+            'fx_admin_user_UID': admin_id,
             'fx_admin_user_CODE': fx_admin_user_CODE
         }
     
@@ -248,21 +249,19 @@ def check_login_status(url : str):
     try:
         response = session.get(url=url, cookies=cookies, timeout=5)
         if check.type_name(response) == 'NoneType':
-            print(f"check 251")
             return {
                 "result": False,
-                "message": "failed",
+                "message": "check.type_name(response) == 'NoneType'",
                 "data" : []
             }
     except Exception as e:
-        print(f"check 258")
         return {
                 "result": False,
-                "message": "failed",
+                "message": f"error: {e} , response: {response}",
+                
                 "data" : []
             }
     else:
-        # print(response.text)
         if len(response.headers) == 12:
             return {
                 "result": True,
@@ -273,7 +272,6 @@ def check_login_status(url : str):
                 }]
             }
         else:
-            print(f"check 275")
             return {
                 "result": False,
                 "message": "failed",
@@ -281,7 +279,7 @@ def check_login_status(url : str):
             }
 
 
-def main(url : str , path : str ,query : dict):
+def main(url : str , path : str ,query : dict, admin_name : str, admin_id : str):
     """
     Executes a main function that performs a series of operations.
     
@@ -296,7 +294,7 @@ def main(url : str , path : str ,query : dict):
             - message (str): A message describing the result of the operation.
             - data (list): A list of data returned by the operation.
     """
-    result = check_login_status(url)
+    result = check_login_status(url, admin_name, admin_id)
     if check.type_name(result) == 'NoneType':
         return {
                 "result": False,
@@ -334,9 +332,9 @@ def main(url : str , path : str ,query : dict):
         cookies={
             "JSESSIONID": cookiesPHPSESSID,
             'QINGZHIFU_PATH': 'qingzhifu',
-            'fx_admin_user_UNAME': 'beidou',
+            'fx_admin_user_UNAME': admin_name,
             'menudd': '0',
-            'fx_admin_user_UID': '17',
+            'fx_admin_user_UID': admin_id,
             'fx_admin_user_CODE': fx_admin_user_CODE
         }
 
@@ -353,7 +351,7 @@ def main(url : str , path : str ,query : dict):
         except Exception as e:
             return {
                     "result": False,
-                    "message": "failed",
+                    "message": f"error : {e}",
                     "data" : []
                 }
         else:
@@ -375,10 +373,44 @@ def main(url : str , path : str ,query : dict):
                     continue
                 data.append(row)
 
+            tagtopdiv = soup.find('div', class_='row tagtopdiv')
+            data_top = []
+            if tagtopdiv is None:
+                pass
+            else:
+                divs = tagtopdiv.find_all('div', class_='panel')
+
+                for div in divs:
+                    panel_body = div.find('div', class_='panel-body')
+                    h4_elements = panel_body.find_all('h4', class_='pull-left text-danger')
+                    values = [h4.text.strip() for h4 in h4_elements]
+                    data_top.append(values)
+
+            # <div id="wypage">
+            page_info = soup.find('div', id='wypage')
+            data_page = {}
+            if tagtopdiv is None:
+                pass
+            else:
+                page_info_text = page_info.find('a', class_='number').text.strip()
+                record_count, page_number, total_pages = re.search(r'(\d+) 条记录 (\d+)/(\d+) 页', page_info_text).groups()
+
+                record_count = int(record_count)
+                page_number = int(page_number)
+                total_pages = int(total_pages)
+
+                data_page = {
+                    "record_count": record_count,
+                    "page_number": page_number,
+                    "total_pages": total_pages
+                }
+
             return {
                 "result": True,
                 "message": "success",
-                "data" : data
+                "data": data,
+                "data_top": data_top,
+                "data_page": data_page
             }
             
     else:
@@ -387,6 +419,3 @@ def main(url : str , path : str ,query : dict):
                 "message": "failed",
                 "data" : []
         }
-
-
-
