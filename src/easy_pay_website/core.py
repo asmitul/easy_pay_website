@@ -373,37 +373,46 @@ def main(url : str , path : str ,query : dict, admin_name : str, admin_id : str)
                     continue
                 data.append(row)
 
-            tagtopdiv = soup.find('div', class_='row tagtopdiv')
-            data_top = []
-            if tagtopdiv is None:
-                pass
-            else:
-                divs = tagtopdiv.find_all('div', class_='panel')
+            try:
+                # <div class="row tagtopdiv">
+                tagtopdiv = soup.find('div', class_='row tagtopdiv')
+                data_top = []
+                if tagtopdiv is None:
+                    pass
+                else:
+                    divs = tagtopdiv.find_all('div', class_='panel')
 
-                for div in divs:
-                    panel_body = div.find('div', class_='panel-body')
-                    h4_elements = panel_body.find_all('h4', class_='pull-left text-danger')
-                    values = [h4.text.strip() for h4 in h4_elements]
-                    data_top.append(values)
+                    for div in divs:
+                        panel_body = div.find('div', class_='panel-body')
+                        h4_elements = panel_body.find_all('h4', class_='pull-left text-danger')
+                        values = [h4.text.strip() for h4 in h4_elements]
+                        data_top.append(values)
+            except Exception as e:
+                print(f"error : {e}")
+                data_top = []
 
-            # <div id="wypage">
-            page_info = soup.find('div', id='wypage')
-            data_page = {}
-            if tagtopdiv is None:
-                pass
-            else:
-                page_info_text = page_info.find('a', class_='number').text.strip()
-                record_count, page_number, total_pages = re.search(r'(\d+) 条记录 (\d+)/(\d+) 页', page_info_text).groups()
+            try:
+                # <div id="wypage">
+                page_info = soup.find('div', id='wypage')
+                data_page = {}
+                if tagtopdiv is None:
+                    pass
+                else:
+                    page_info_text = page_info.find('a', class_='number').text.strip()
+                    record_count, page_number, total_pages = re.search(r'(\d+) 条记录 (\d+)/(\d+) 页', page_info_text).groups()
 
-                record_count = int(record_count)
-                page_number = int(page_number)
-                total_pages = int(total_pages)
+                    record_count = int(record_count)
+                    page_number = int(page_number)
+                    total_pages = int(total_pages)
 
-                data_page = {
-                    "record_count": record_count,
-                    "page_number": page_number,
-                    "total_pages": total_pages
-                }
+                    data_page = {
+                        "record_count": record_count,
+                        "page_number": page_number,
+                        "total_pages": total_pages
+                    }
+            except Exception as e:
+                print(f"error : {e}")
+                data_page = {}
 
             return {
                 "result": True,
