@@ -262,7 +262,7 @@ def check_login_status(url : str, admin_name : str, admin_id : str):
                 "data" : []
             }
     else:
-        if len(response.headers) == 12:
+        if len(response.headers) == 13:
             return {
                 "result": True,
                 "message": "success",
@@ -274,7 +274,7 @@ def check_login_status(url : str, admin_name : str, admin_id : str):
         else:
             return {
                 "result": False,
-                "message": "failed",
+                "message": "failed, len not equal to 13",
                 "data" : []
             }
 
