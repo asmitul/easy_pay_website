@@ -63,7 +63,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
 
         try:
             response = session.get(url=url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin, timeout=5)
-            print(f"response 66 : {response}")
+            print(f"response 66 : {response.text}")
             if check.type_name(response) == 'NoneType':
                 return {
                             "result": False,
