@@ -41,7 +41,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
     except Exception as e:
         return {
                     "result": False,
-                    "message": "failed",
+                    "message": "failed error: "+str(e),
                     "data" : []
             }
     else:
@@ -72,7 +72,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
         except Exception as e:
             return {
                         "result": False,
-                        "message": "failed",
+                        "message": "failed, error: "+str(e),
                         "data" : []
                 }
         else:
@@ -124,7 +124,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
             except Exception as e:
                 return {
                                 "result": False,
-                                "message": "failed",
+                                "message": "failed , error :" + str(e),
                                 "data" : []
                             }
             else:
@@ -168,7 +168,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
                 except Exception as e:
                     return {
                             "result": False,
-                            "message": "failed",
+                            "message": "failed, error: " + str(e),
                             "data" : []
                     }
                 else:
@@ -257,12 +257,12 @@ def check_login_status(url : str, admin_name : str, admin_id : str):
     except Exception as e:
         return {
                 "result": False,
-                "message": f"error: {e} , response: {response}",
+                "message": f"error: {e}",
                 
                 "data" : []
             }
     else:
-        if len(response.headers) == 13:
+        if "Cache-Control" in response.headers and response.headers["Cache-Control"] == "private":
             return {
                 "result": True,
                 "message": "success",
@@ -274,7 +274,7 @@ def check_login_status(url : str, admin_name : str, admin_id : str):
         else:
             return {
                 "result": False,
-                "message": "failed, len not equal to 13",
+                "message": "login failed , please check your username and password",
                 "data" : []
             }
 
