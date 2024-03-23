@@ -63,6 +63,7 @@ def login(url: str, username: str, password: str, quary_key: Union[str, int], qu
 
         try:
             response = session.get(url=url+"/manage.php?"+quary_key+"="+query_value, cookies=cookiesLogin, timeout=5)
+            print(f"response 66 : {response}")
             if check.type_name(response) == 'NoneType':
                 return {
                             "result": False,
@@ -428,3 +429,46 @@ def main(url : str , path : str ,query : dict, admin_name : str, admin_id : str)
                 "message": "failed",
                 "data" : []
         }
+    
+if __name__ == '__main__':
+    url = "http://beidou.6688732.com"
+    username = "beidou"
+    password = "dhdhqwt77!!92A11"
+    quary_key = "tianmasetsail"
+    query_value = "20230788"
+    admin_name = "beidou"
+    admin_id = "17"
+
+    # login_result = login(url, username, password, quary_key, query_value)
+    # print(login_result)
+    # http://beidou.6688732.com/manage/dingdan/index.html?userid=&ordernum=&ordermd5=&tz=&pzid=36&jkstyle=&status=1&bdstatus=&start=2024-02-13+00%3A00%3A00&end=2024-02-16+23%3A59%3A59
+    path= "/manage/dingdan/index.html"
+    query = {
+        "userid": "",
+        "ordernum": "",
+        "ordermd5": "",
+        "tz": "",
+        "pzid": "36",
+        "jkstyle": "",
+        "status": "1",
+        "bdstatus": "",
+        "start": "2024-02-13 00:00:00",
+        "end": "2024-02-16 23:59:59"
+    }
+
+    # http://beidou.6688732.com/manage/api/user.html
+    # path = "/manage/http/index.html"
+    # query = {}
+
+    # http://beidou.6688732.com/manage/pay/index/status/1.html
+    # path = "/manage/pay/index/status/1.html"
+    # query = {}
+
+    # result = main(url, path, query, admin_name, admin_id)
+    # print(result)
+
+    # result = check_login_status(url, admin_name, admin_id)
+    # print(result)
+
+    r = login(url, username, password, quary_key, query_value)
+    print(r)
